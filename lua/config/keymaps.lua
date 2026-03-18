@@ -7,9 +7,12 @@ local unmap = vim.keymap.del
 map("n", "]t", "<cmd>tabnext<cr>", { desc = "Next Tab" })
 map("n", "[t", "<cmd>tabprevious<cr>", { desc = "Previous Tab" })
 
+-- 快速删除buffer
 map("n", "<leader>r", function()
-  require("mini.bufremove").delete(0, true)
+  -- require("mini.bufremove").delete(0, true)
+  Snacks.bufdelete()
 end, { desc = "Close current buffer" })
+
 unmap("n", "<leader>l", { desc = "Lazy" })
 
 vim.keymap.set("n", "<A-h>", "<cmd>bprevious<cr>", { desc = "Previous buffer" })
@@ -38,7 +41,6 @@ vim.api.nvim_create_autocmd("LspAttach", {
 })
 vim.keymap.set("n", "<leader>k", vim.lsp.buf.hover, { desc = "Hover Documentation" })
 
-
 -- 调试相关
 vim.keymap.set("n", "<leader>dE", function()
   require("dapui").eval(vim.fn.input("Expression: "))
@@ -49,6 +51,7 @@ vim.keymap.set("n", "<leader>dL", function()
   vim.cmd("copen")
 end, { desc = "List all breakpoints" })
 
-
 -- 快捷进入开始页面
-vim.keymap.set("n", "<leader>ls", function() Snacks.dashboard() end, { desc = "Launch Start Screen" })
+vim.keymap.set("n", "<leader>ls", function()
+  Snacks.dashboard()
+end, { desc = "Launch Start Screen" })

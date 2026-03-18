@@ -12,10 +12,11 @@ return {
             api_key = function()
               return os.getenv("ANTHROPIC_AUTH_TOKEN")
             end,
-            end_point = function ()
-                return os.getenv("ANTHROPIC_BASE_URL")
-            end
+            -- end_point = function ()
+            --     return os.getenv("ANTHROPIC_BASE_URL") .. "/v1/messages"
+            -- end,
             -- end_point = "https://code.newcli.com/claude/ultra/v1/messages",
+            end_point = "https://code.newcli.com/claude/aws/v1/messages",
           },
         },
         virtualtext = {
