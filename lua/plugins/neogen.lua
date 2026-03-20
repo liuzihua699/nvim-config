@@ -114,6 +114,11 @@ return {
       vim.api.nvim_create_autocmd("FileType", {
         pattern = { "c", "cpp" },
         callback = function(ev)
+          -- 注释行识别
+          vim.schedule(function()
+            vim.opt_local.formatoptions:append("ro")
+          end)
+
           vim.keymap.set("i", "<CR>", function()
             local line = vim.api.nvim_get_current_line()
 

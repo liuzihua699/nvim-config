@@ -3,6 +3,7 @@ return {
     "milanglacier/minuet-ai.nvim",
     dependencies = { "nvim-lua/plenary.nvim" },
     config = function()
+      vim.api.nvim_set_hl(0, "MinuetVirtualText", { fg = "#808080", italic = true })
       require("minuet").setup({
         provider = "claude",
         provider_options = {
@@ -15,8 +16,9 @@ return {
             -- end_point = function ()
             --     return os.getenv("ANTHROPIC_BASE_URL") .. "/v1/messages"
             -- end,
-            -- end_point = "https://code.newcli.com/claude/ultra/v1/messages",
-            end_point = "https://code.newcli.com/claude/aws/v1/messages",
+            end_point = "https://code.newcli.com/claude/ultra/v1/messages",
+            -- end_point = "https://code.newcli.com/claude/aws/v1/messages",
+            -- end_point = "https://code.newcli.com/claude/v1/messages",
           },
         },
         virtualtext = {
