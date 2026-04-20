@@ -9,7 +9,7 @@ return {
         provider_options = {
           claude = {
             model = "claude-sonnet-4-6",
-            max_tokens = 512,
+            max_tokens = 4096,
             api_key = function()
               return os.getenv("ANTHROPIC_AUTH_TOKEN")
             end,
@@ -31,7 +31,7 @@ return {
             dismiss = "<C-e>",
           },
         },
-        debounce = 600,
+        debounce = 100,
       })
     end,
   },

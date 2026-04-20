@@ -58,7 +58,8 @@
 return {
   {
     "3rd/image.nvim",
-    ft = { "png", "jpg", "jpeg", "gif", "bmp", "webp", "markdown" },
+    -- ft = { "png", "jpg", "jpeg", "gif", "bmp", "webp", "markdown" },
+    ft = { "png", "jpg", "jpeg", "gif", "bmp", "webp" },
     event = "BufReadPre",
     opts = {
       backend = "sixel",
