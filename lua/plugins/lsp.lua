@@ -10,6 +10,12 @@ return {
           },
         },
         clangd = {
+          root_markers = {
+            ".clangd",
+            "compile_flags.txt",
+            "compile_commands.json",
+            ".git",
+          },
           cmd = {
             "clangd",
             "--background-index",

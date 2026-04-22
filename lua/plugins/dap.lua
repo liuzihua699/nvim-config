@@ -9,6 +9,33 @@ return {
       { "<leader>dx", function() require("persistent-breakpoints.api").clear_all_breakpoints() end, desc = "Clear All Breakpoints" },
     },
     config = function()
+      local function build_current_cpp()
+        local source = vim.api.nvim_buf_get_name(0)
+        if source == "" then
+          error("Current buffer has no file path")
+        end
+
+        local output_dir = vim.fn.stdpath("cache") .. "/leetcode/bin"
+        vim.fn.mkdir(output_dir, "p")
+
+        local output = output_dir .. "/" .. vim.fn.fnamemodify(source, ":t:r")
+        local result = vim.system({
+          "g++",
+          "-std=c++20",
+          "-g",
+          "-O0",
+          source,
+          "-o",
+          output,
+        }, { text = true }):wait()
+
+        if result.code ~= 0 then
+          error((result.stderr ~= "" and result.stderr) or "Failed to build current file")
+        end
+
+        return output
+      end
+
       vim.fn.sign_define("DapBreakpoint", { text = "●", texthl = "DiagnosticError", linehl = "", numhl = "" })
       vim.fn.sign_define("DapBreakpointCondition", { text = "◉", texthl = "DiagnosticWarn", linehl = "", numhl = "" })
       vim.fn.sign_define("DapStopped", { text = "▶", texthl = "DiagnosticOk", linehl = "DapStoppedLine", numhl = "" })
@@ -23,6 +50,21 @@ return {
         },
       }
       dap.configurations.cpp = {
+        {
+          name = "LeetCode: Build and Debug Current File",
+          type = "codelldb",
+          request = "launch",
+          program = function()
+            return build_current_cpp()
+          end,
+          cwd = "${fileDirname}",
+          args = function()
+            local input = vim.fn.input("Args: ")
+            if input == "" then return {} end
+            return vim.split(input, " ")
+          end,
+          stopOnEntry = false,
+        },
         {
           name = "Launch",
           type = "codelldb",

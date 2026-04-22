@@ -26,6 +26,7 @@ require("lazy").setup({
     -- 以后用 Claude 就注释上面两行，加下面的：
     { import = "lazyvim.plugins.extras.ai.claudecode" },
     { import = "lazyvim.plugins.extras.lang.python" },
+    { import = "lazyvim.plugins.extras.lang.java" },
 
     { import = "plugins" },
   },
