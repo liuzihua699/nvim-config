@@ -33,7 +33,7 @@ local daily = Button("Daily", {
   on_press = cmd.qot,
 })
 
-local study_plans = Button("Study Plans", {
+local study_plans = Button("我的题单", {
   icon = "󰔷",
   sc = "s",
   on_press = cmd.plan_menu,

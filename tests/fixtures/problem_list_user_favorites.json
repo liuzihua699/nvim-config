@@ -1,0 +1,31 @@
+{
+  "data": {
+    "favoritesLists": {
+      "allFavorites": [
+        {
+          "idHash": "0b8xoj1",
+          "name": "Favorite",
+          "isPublicFavorite": false,
+          "questions": [
+            {
+              "titleSlug": "edit-distance"
+            }
+          ]
+        },
+        {
+          "idHash": "uSPISoCs",
+          "name": "速刷-双指针",
+          "isPublicFavorite": true,
+          "questions": [
+            {
+              "titleSlug": "partition-list"
+            },
+            {
+              "titleSlug": "merge-two-sorted-lists"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

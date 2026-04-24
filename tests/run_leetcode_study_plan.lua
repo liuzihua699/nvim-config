@@ -1,4 +1,5 @@
 local cwd = vim.fn.getcwd()
+vim.opt.runtimepath:prepend(cwd)
 
 local function add_lua_path(dir)
   package.path = table.concat({

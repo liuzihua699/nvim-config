@@ -15,6 +15,34 @@ end
 
 return {
   {
+    name = "parse_user_favorites extracts remote custom lists with ordered questions",
+    fn = function()
+      local study_plan = require("leetcode_ext.study_plan")
+      local favorites = study_plan.parse_user_favorites(vim.json.decode(read_fixture("problem_list_user_favorites.json")))
+
+      assert_eq(#favorites, 2)
+      assert_eq(favorites[1].slug, "0b8xoj1")
+      assert_eq(favorites[2].slug, "uSPISoCs")
+      assert_eq(favorites[2].name, "速刷-双指针")
+      assert_eq(favorites[2].is_public, true)
+      assert_list_eq(favorites[2].question_slugs, {
+        "partition-list",
+        "merge-two-sorted-lists",
+      })
+    end,
+  },
+  {
+    name = "find_user_favorite returns the matching custom list",
+    fn = function()
+      local study_plan = require("leetcode_ext.study_plan")
+      local favorites = study_plan.parse_user_favorites(vim.json.decode(read_fixture("problem_list_user_favorites.json")))
+      local favorite = study_plan.find_user_favorite(favorites, "uSPISoCs")
+
+      assert_eq(favorite.name, "速刷-双指针")
+      assert_eq(favorite.slug, "uSPISoCs")
+    end,
+  },
+  {
     name = "parse_plan_html extracts ordered questions from __NEXT_DATA__",
     fn = function()
       local study_plan = require("leetcode_ext.study_plan")
@@ -54,6 +82,16 @@ return {
     end,
   },
   {
+    name = "extract_my_list_slug preserves case for direct open commands",
+    fn = function()
+      local study_plan = require("leetcode_ext.study_plan")
+
+      assert_eq(study_plan.extract_my_list_slug("list my open uSPISoCs"), "uSPISoCs")
+      assert_eq(study_plan.extract_my_list_slug(" list   my   open   dyCzJ7QS "), "dyCzJ7QS")
+      assert_eq(study_plan.extract_my_list_slug("list my"), nil)
+    end,
+  },
+  {
     name = "setup injects the plan command tree",
     fn = function()
       local study_plan = require("leetcode_ext.study_plan")
@@ -65,6 +103,10 @@ return {
       assert_eq(type(cmd.commands.plan[1]), "function")
       assert_eq(type(cmd.commands.plan["top-interview-150"][1]), "function")
       assert_eq(type(cmd.commands.plan.update[1]), "function")
+      assert_eq(type(cmd.commands.list.my), "table")
+      assert_eq(type(cmd.commands.list.my[1]), "function")
+      assert_eq(type(cmd.commands.list.my.update[1]), "function")
+      assert_eq(type(cmd.commands.list.my.open[1]), "function")
     end,
   },
 }

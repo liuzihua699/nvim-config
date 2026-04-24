@@ -12,6 +12,7 @@ return {
       { "<leader>ld", "<cmd>Leet daily<cr>", desc = "LeetCode Daily" },
       { "<leader>lr", "<cmd>Leet random<cr>", desc = "LeetCode Random" },
       { "<leader>lt", "<cmd>Leet plan top-interview-150<cr>", desc = "LeetCode Top Interview 150" },
+      { "<leader>lm", "<cmd>Leet list my<cr>", desc = "LeetCode My Lists" },
     },
     opts = {
       lang = "cpp",
