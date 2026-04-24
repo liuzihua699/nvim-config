@@ -33,10 +33,16 @@ local daily = Button("Daily", {
   on_press = cmd.qot,
 })
 
-local study_plans = Button("我的题单", {
+local official_plans = Button("学习计划[官方]", {
   icon = "󰔷",
-  sc = "s",
+  sc = "o",
   on_press = cmd.plan_menu,
+})
+
+local my_lists = Button("我的题单", {
+  icon = "󰒃",
+  sc = "s",
+  on_press = cmd.my_list_menu,
 })
 
 local back = BackButton("menu")
@@ -45,7 +51,8 @@ page:insert(Buttons({
   list,
   random,
   daily,
-  study_plans,
+  official_plans,
+  my_lists,
   back,
 }))
 

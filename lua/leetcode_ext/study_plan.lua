@@ -5,8 +5,20 @@ local log = require("leetcode.logger")
 local M = {
   cache_interval = 60 * 60 * 24,
   plans = {
+    ["cracking-the-coding-interview"] = {
+      name = "程序员面试金典",
+    },
+    ["leetcode-75"] = {
+      name = "LeetCode 75",
+    },
+    ["premium-algo-100"] = {
+      name = "尊享面试 100 题",
+    },
     ["top-interview-150"] = {
       name = "Top Interview 150",
+    },
+    ["top-100-liked"] = {
+      name = "LeetCode 热题 100",
     },
   },
 }
@@ -91,6 +103,23 @@ local function normalize_plan(detail)
     question_slugs = question_slugs,
     groups = groups,
   }
+end
+
+function M.official_plan_entries()
+  local plans = {}
+
+  for slug, plan in pairs(M.plans) do
+    table.insert(plans, {
+      slug = slug,
+      name = plan.name or slug,
+    })
+  end
+
+  table.sort(plans, function(a, b)
+    return a.slug < b.slug
+  end)
+
+  return plans
 end
 
 function M.parse_user_favorites(decoded)
@@ -241,21 +270,121 @@ function M.parse_plan_html(html, slug)
   return normalize_plan(find_plan_detail(decoded, slug))
 end
 
-function M.resolve_questions(plan, problems)
+local function plan_question_details(plan)
+  local ordered = {}
   local by_slug = {}
-  for _, problem in ipairs(problems or {}) do
-    by_slug[problem.title_slug] = problem
+  local seen = {}
+
+  for _, group in ipairs(plan.groups or {}) do
+    for _, question in ipairs(group.questions or {}) do
+      local slug = question.title_slug
+      if slug and not seen[slug] then
+        seen[slug] = true
+        by_slug[slug] = question
+      end
+    end
   end
 
+  for _, slug in ipairs(plan.question_slugs or {}) do
+    if slug and not seen[slug] then
+      seen[slug] = true
+      by_slug[slug] = by_slug[slug] or { title_slug = slug }
+    end
+  end
+
+  if not vim.tbl_isempty(plan.question_slugs or {}) then
+    for _, slug in ipairs(plan.question_slugs or {}) do
+      if by_slug[slug] then
+        table.insert(ordered, by_slug[slug])
+      end
+    end
+    return ordered, by_slug
+  end
+
+  for _, group in ipairs(plan.groups or {}) do
+    for _, question in ipairs(group.questions or {}) do
+      local slug = question.title_slug
+      if slug and by_slug[slug] and not seen[slug .. "__ordered"] then
+        seen[slug .. "__ordered"] = true
+        table.insert(ordered, by_slug[slug])
+      end
+    end
+  end
+
+  return ordered, by_slug
+end
+
+local function normalize_frontend_id(frontend_id)
+  if frontend_id == nil then
+    return
+  end
+
+  local normalized = vim.trim(tostring(frontend_id))
+  if normalized == "" then
+    return
+  end
+
+  return normalized
+end
+
+local function synthetic_question(question)
+  if not question or not question.title_slug then
+    return
+  end
+
+  if not question.frontend_id and not question.title and not question.title_cn and not question.difficulty then
+    return
+  end
+
+  return {
+    id = question.id or 0,
+    frontend_id = normalize_frontend_id(question.frontend_id) or question.title_slug,
+    link = ("https://leetcode.%s/problems/%s/"):format(config.domain, question.title_slug),
+    title = question.title or question.title_slug,
+    title_cn = question.title_cn or "",
+    title_slug = question.title_slug,
+    status = question.status or "todo",
+    paid_only = question.paid_only and true or false,
+    ac_rate = tonumber(question.ac_rate) or 0,
+    difficulty = question.difficulty or "Medium",
+    topic_tags = question.topic_tags or {},
+  }
+end
+
+function M.resolve_questions(plan, problems)
+  local by_slug = {}
+  local by_frontend_id = {}
+  for _, problem in ipairs(problems or {}) do
+    by_slug[problem.title_slug] = problem
+    local frontend_id = normalize_frontend_id(problem.frontend_id)
+    if frontend_id and not by_frontend_id[frontend_id] then
+      by_frontend_id[frontend_id] = problem
+    end
+  end
+
+  local ordered_questions, plan_by_slug = plan_question_details(plan)
   local selected = {}
   local missing = {}
 
-  for _, slug in ipairs(plan.question_slugs or {}) do
+  for _, question in ipairs(ordered_questions) do
+    local slug = question.title_slug
     local problem = by_slug[slug]
+    if not problem then
+      local frontend_id = normalize_frontend_id(question.frontend_id)
+      if frontend_id then
+        problem = by_frontend_id[frontend_id]
+      end
+    end
+
     if problem then
       table.insert(selected, vim.deepcopy(problem))
     else
-      table.insert(missing, slug)
+      local fallback = synthetic_question(plan_by_slug[slug])
+      if fallback then
+        table.insert(selected, fallback)
+      else
+        table.insert(missing, slug)
+      end
     end
   end
 
@@ -339,6 +468,18 @@ function M.update_plan(slug)
   return plan_or_err
 end
 
+function M.update_all_plans()
+  local refreshed = {}
+
+  for _, plan in ipairs(M.official_plan_entries()) do
+    M.update_plan(plan.slug)
+    table.insert(refreshed, plan.slug)
+  end
+
+  log.info(("Official plans cache updated (%d plan(s))"):format(#refreshed))
+  return refreshed
+end
+
 function M.update_user_favorites()
   local ok, favorites_or_err = pcall(function()
     return M.get_user_favorites({ force = true })
@@ -408,7 +549,7 @@ local function install_plan_commands()
   end
 
   cmd.plan_menu = function()
-    reload_page("plans")
+    reload_page("official_plans")
   end
 
   cmd.my_list_menu = function()
@@ -421,6 +562,10 @@ local function install_plan_commands()
 
   cmd.plan_update_top_interview_150 = function()
     M.update_plan("top-interview-150")
+  end
+
+  cmd.plan_update_all = function()
+    M.update_all_plans()
   end
 
   cmd.my_list_open = function(opts)
@@ -441,7 +586,7 @@ local function install_plan_commands()
     cmd.plan_menu,
     ["top-interview-150"] = { cmd.plan_top_interview_150 },
     update = {
-      cmd.plan_update_top_interview_150,
+      cmd.plan_update_all,
       ["top-interview-150"] = { cmd.plan_update_top_interview_150 },
     },
   }

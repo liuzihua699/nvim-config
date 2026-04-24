@@ -16,7 +16,7 @@ return {
             -- end_point = function ()
             --     return os.getenv("ANTHROPIC_BASE_URL") .. "/v1/messages"
             -- end,
-            end_point = "https://code.newcli.com/claude/ultra/v1/messages",
+            end_point = "https://openrouter.icu/v1/messages",
             -- end_point = "https://code.newcli.com/claude/aws/v1/messages",
             -- end_point = "https://code.newcli.com/claude/v1/messages",
           },

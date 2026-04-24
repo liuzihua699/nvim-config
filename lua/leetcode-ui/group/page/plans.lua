@@ -18,28 +18,12 @@ page:insert(header)
 
 page:insert(Title({ "Menu", "Problems" }, "我的题单"))
 
-table.insert(buttons, Button("Top Interview 150", {
-  icon = "󰊴",
-  sc = "t",
-  on_press = function()
-    study_plan.open_plan("top-interview-150")
-  end,
-}))
-
-table.insert(buttons, Button("Refresh Top 150", {
-  icon = "󰑐",
-  sc = "u",
-  on_press = function()
-    study_plan.update_plan("top-interview-150")
-  end,
-}))
-
 table.insert(buttons, Button("刷新我的题单", {
   icon = "󰑐",
   sc = "m",
   on_press = function()
     if study_plan.update_user_favorites() then
-      cmd.plan_menu()
+      cmd.my_list_menu()
     end
   end,
 }))

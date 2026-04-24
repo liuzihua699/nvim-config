@@ -82,6 +82,66 @@ return {
     end,
   },
   {
+    name = "resolve_questions falls back to official plan metadata when cache entries are missing",
+    fn = function()
+      local study_plan = require("leetcode_ext.study_plan")
+      local config = require("leetcode.config")
+      local plan = {
+        question_slugs = {
+          "is-unique-lcci",
+          "check-permutation-lcci",
+        },
+        groups = {
+          {
+            questions = {
+              {
+                title_slug = "is-unique-lcci",
+                frontend_id = "面试题 01.01",
+                title = "Is Unique LCCI",
+                title_cn = "判定字符是否唯一",
+                difficulty = "Easy",
+                paid_only = false,
+              },
+              {
+                title_slug = "check-permutation-lcci",
+                frontend_id = "面试题 01.02",
+                title = "Check Permutation LCCI",
+                title_cn = "判定是否互为字符重排",
+                difficulty = "Easy",
+                paid_only = false,
+              },
+            },
+          },
+        },
+      }
+
+      local selected, missing = study_plan.resolve_questions(plan, {
+        {
+          title_slug = "check-permutation-lcci",
+          frontend_id = "面试题 01.02",
+          title = "Check Permutation LCCI",
+          title_cn = "判定是否互为字符重排",
+          difficulty = "Easy",
+          status = "ac",
+          ac_rate = 63.2,
+          paid_only = false,
+          link = "https://leetcode.cn/problems/check-permutation-lcci/",
+          topic_tags = {},
+        },
+      })
+
+      assert_eq(#selected, 2)
+      assert_eq(selected[1].title_slug, "is-unique-lcci")
+      assert_eq(selected[1].frontend_id, "面试题 01.01")
+      assert_eq(selected[1].status, "todo")
+      assert_eq(selected[1].ac_rate, 0)
+      assert_eq(selected[1].link, ("https://leetcode.%s/problems/is-unique-lcci/"):format(config.domain))
+      assert_eq(selected[2].title_slug, "check-permutation-lcci")
+      assert_eq(selected[2].status, "ac")
+      assert_list_eq(missing, {})
+    end,
+  },
+  {
     name = "extract_my_list_slug preserves case for direct open commands",
     fn = function()
       local study_plan = require("leetcode_ext.study_plan")
@@ -103,10 +163,63 @@ return {
       assert_eq(type(cmd.commands.plan[1]), "function")
       assert_eq(type(cmd.commands.plan["top-interview-150"][1]), "function")
       assert_eq(type(cmd.commands.plan.update[1]), "function")
+      assert_eq(type(cmd.plan_update_all), "function")
       assert_eq(type(cmd.commands.list.my), "table")
       assert_eq(type(cmd.commands.list.my[1]), "function")
       assert_eq(type(cmd.commands.list.my.update[1]), "function")
       assert_eq(type(cmd.commands.list.my.open[1]), "function")
+    end,
+  },
+  {
+    name = "menu commands target separate official and personal list pages",
+    fn = function()
+      local study_plan = require("leetcode_ext.study_plan")
+      local cmd = require("leetcode.command")
+      local opened = {}
+
+      study_plan.setup()
+
+      local orig_set_menu_page = cmd.set_menu_page
+      cmd.set_menu_page = function(page)
+        table.insert(opened, page)
+      end
+
+      cmd.plan_menu()
+      cmd.my_list_menu()
+
+      cmd.set_menu_page = orig_set_menu_page
+
+      assert_list_eq(opened, {
+        "official_plans",
+        "plans",
+      })
+    end,
+  },
+  {
+    name = "update_all_plans refreshes every configured official plan",
+    fn = function()
+      local study_plan = require("leetcode_ext.study_plan")
+      local refreshed = {}
+      local original_plans = study_plan.plans
+      local original_update_plan = study_plan.update_plan
+
+      study_plan.plans = {
+        ["top-interview-150"] = { name = "Top Interview 150" },
+        ["foo-plan"] = { name = "Foo Plan" },
+      }
+      study_plan.update_plan = function(slug)
+        table.insert(refreshed, slug)
+      end
+
+      study_plan.update_all_plans()
+
+      study_plan.plans = original_plans
+      study_plan.update_plan = original_update_plan
+
+      assert_list_eq(refreshed, {
+        "foo-plan",
+        "top-interview-150",
+      })
     end,
   },
 }
