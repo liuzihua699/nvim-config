@@ -11,6 +11,7 @@ return {
       { "<leader>ll", "<cmd>Leet<cr>", desc = "LeetCode" },
       { "<leader>ld", "<cmd>Leet daily<cr>", desc = "LeetCode Daily" },
       { "<leader>lr", "<cmd>Leet random<cr>", desc = "LeetCode Random" },
+      { "<leader>lt", "<cmd>Leet plan top-interview-150<cr>", desc = "LeetCode Top Interview 150" },
     },
     opts = {
       lang = "cpp",
@@ -41,5 +42,9 @@ return {
         non_standalone = true,
       },
     },
+    config = function(_, opts)
+      require("leetcode").setup(opts)
+      require("leetcode_ext.study_plan").setup()
+    end,
   },
 }
