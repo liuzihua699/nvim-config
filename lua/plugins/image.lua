@@ -66,11 +66,7 @@ return {
       processor = "magick_cli",
       integrations = {
         markdown = {
-          enabled = true,
-          resolve_image_path = function(document_path, image_path, fallback)
-            -- 支持相对路径：以 md 文件所在目录为基准解析图片路径
-            return fallback(document_path, image_path)
-          end,
+          enabled = false,
         },
         neorg = { enabled = false },
       },

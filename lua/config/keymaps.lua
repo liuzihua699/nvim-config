@@ -18,6 +18,37 @@ unmap("n", "<leader>l", { desc = "Lazy" })
 vim.keymap.set("n", "<A-h>", "<cmd>bprevious<cr>", { desc = "Previous buffer" })
 vim.keymap.set("n", "<A-l>", "<cmd>bnext<cr>", { desc = "Next buffer" })
 
+map("n", "<leader>o", function()
+  local jumplist, current_index = unpack(vim.fn.getjumplist())
+  local bufnr = vim.api.nvim_get_current_buf()
+  local state = vim.w.current_buffer_jump_state
+  local start_index = current_index
+
+  if state and state.bufnr == bufnr and state.jumplist_index == current_index then
+    start_index = state.next_index
+  end
+
+  for i = math.min(start_index, #jumplist), 1, -1 do
+    local jump = jumplist[i]
+
+    if jump.bufnr == bufnr then
+      local line_count = vim.api.nvim_buf_line_count(bufnr)
+      local line = math.min(jump.lnum, line_count)
+      local column = math.max(jump.col, 0)
+
+      vim.api.nvim_win_set_cursor(0, { line, column })
+      vim.w.current_buffer_jump_state = {
+        bufnr = bufnr,
+        jumplist_index = current_index,
+        next_index = i - 1,
+      }
+      return
+    end
+  end
+
+  vim.notify("No previous jump in current buffer", vim.log.levels.INFO)
+end, { desc = "Jump back in current buffer" })
+
 -- vim.keymap.set({ "n", "v" }, "J", "5j", { desc = "Move down 5 lines" })
 -- vim.keymap.set({ "n", "v" }, "K", "5k", { desc = "Move up 5 lines" })
 -- vim.keymap.set({ "n", "v" }, "H", "0", { desc = "Go to line start" })
