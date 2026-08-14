@@ -63,9 +63,10 @@ return {
       })
 
       local function easymotion_search()
-        local original = vim.api.nvim_win_get_cursor(0)
-        local input = vim.fn["EasyMotion#command_line#GetInput"](-1, vim.fn.getreg("/"), 2)
+        local original_view = vim.fn.winsaveview()
+        local input = vim.fn["EasyMotion#command_line#GetInput"](-1, "", 2)
         if input == nil or input == "" then
+          vim.fn.winrestview(original_view)
           return
         end
 
@@ -86,12 +87,20 @@ return {
           vim.fn.histadd("search", history_pattern)
         end
 
-        vim.api.nvim_win_set_cursor(0, original)
-        vim.fn["EasyMotion#go"]({
+        local cancelled = vim.fn["EasyMotion#go"]({
           pattern = pattern,
           direction = 2,
           accept_cursor_pos = true,
         })
+        if cancelled ~= 0 then
+          vim.fn.winrestview(original_view)
+          return
+        end
+
+        local destination_view = vim.fn.winsaveview()
+        vim.fn.winrestview(original_view)
+        vim.cmd("normal! m`")
+        vim.fn.winrestview(destination_view)
       end
 
       vim.keymap.set("n", "s", easymotion_search, {
