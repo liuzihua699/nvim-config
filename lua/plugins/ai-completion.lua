@@ -39,6 +39,13 @@ return {
     "saghen/blink.cmp",
     optional = true,
     opts = function(_, opts)
+      opts.fuzzy = vim.tbl_deep_extend("force", opts.fuzzy or {}, {
+        implementation = "lua",
+        prebuilt_binaries = {
+          download = false,
+        },
+      })
+
       opts.sources = opts.sources or {}
       opts.sources.default = opts.sources.default or {}
       table.insert(opts.sources.default, "minuet")

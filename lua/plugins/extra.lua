@@ -1,3 +1,53 @@
+local function cmake_tools_cache_file()
+  local cwd = vim.loop.cwd()
+  if not cwd then
+    return nil
+  end
+
+  local cache_dir = vim.fn.expand("~") .. "/.cache/cmake_tools_nvim/"
+  local clean_path = cwd:gsub("/", ""):gsub("\\", ""):gsub(":", "")
+  return cache_dir .. clean_path .. ".lua"
+end
+
+local function normalize_cmake_tools_session()
+  local cache_file = cmake_tools_cache_file()
+  if not cache_file or vim.fn.filereadable(cache_file) ~= 1 then
+    return
+  end
+
+  local ok, session = pcall(dofile, cache_file)
+  if not ok or type(session) ~= "table" or next(session) == nil then
+    return
+  end
+
+  local changed = false
+  if type(session.base_settings) ~= "table" then
+    session.base_settings = {}
+    changed = true
+  end
+  if type(session.target_settings) ~= "table" then
+    session.target_settings = {}
+    changed = true
+  end
+  if type(session.launch_args) == "table" then
+    for target in pairs(session.launch_args) do
+      if type(session.target_settings[target]) ~= "table" then
+        session.target_settings[target] = {}
+        changed = true
+      end
+    end
+  end
+  if not changed then
+    return
+  end
+
+  local file = io.open(cache_file, "w")
+  if file then
+    file:write("return " .. vim.inspect(session))
+    file:close()
+  end
+end
+
 return {
   {
     "Civitasv/cmake-tools.nvim",
@@ -31,19 +81,17 @@ return {
     --   require("cmake-tools").setup(opts)
     -- end,
     config = function(_, opts)
+      normalize_cmake_tools_session()
       require("cmake-tools").setup(opts)
 
       vim.api.nvim_create_user_command("CMakeClearCache", function()
-        local cache_dir = vim.fn.expand("~") .. "/.cache/cmake_tools_nvim/"
-        local cwd = vim.loop.cwd()
-        local clean_path = cwd:gsub("/", ""):gsub("\\", ""):gsub(":", "")
-        local cache_file = cache_dir .. clean_path .. ".lua"
+        local cache_file = cmake_tools_cache_file()
 
-        if vim.fn.filereadable(cache_file) == 1 then
+        if cache_file and vim.fn.filereadable(cache_file) == 1 then
           os.remove(cache_file)
           vim.notify("已清除 CMake 缓存: " .. cache_file, vim.log.levels.INFO)
         else
-          vim.notify("未找到缓存文件: " .. cache_file, vim.log.levels.WARN)
+          vim.notify("未找到缓存文件: " .. tostring(cache_file), vim.log.levels.WARN)
         end
       end, { desc = "清除当前项目的 cmake-tools 缓存" })
     end,
