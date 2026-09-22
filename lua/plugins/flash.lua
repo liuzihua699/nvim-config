@@ -110,9 +110,21 @@ return {
       vim.keymap.set({ "x", "o" }, "s", "<Plug>(easymotion-sn)", vim.tbl_extend("force", opts, {
         desc = "EasyMotion Search",
       }))
-      vim.keymap.set("n", "f", "<Plug>(easymotion-overwin-f)", vim.tbl_extend("force", opts, {
+      local function easymotion_find()
+        for _, window in ipairs(vim.api.nvim_tabpage_list_wins(0)) do
+          local buffer = vim.api.nvim_win_get_buf(window)
+          if vim.api.nvim_win_get_config(window).relative == "" and not vim.bo[buffer].modifiable then
+            return vim.fn["EasyMotion#S"](1, 0, 2)
+          end
+        end
+
+        return vim.fn["EasyMotion#OverwinF"](1)
+      end
+
+      vim.keymap.set("n", "f", easymotion_find, {
         desc = "EasyMotion Find",
-      }))
+        silent = true,
+      })
       vim.keymap.set({ "x", "o" }, "f", "<Plug>(easymotion-bd-f)", vim.tbl_extend("force", opts, {
         desc = "EasyMotion Find",
       }))

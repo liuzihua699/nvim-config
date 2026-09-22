@@ -120,4 +120,49 @@ return {
       assert_eq(view.topline, original_view.topline, "empty input should restore the original window top line")
     end,
   },
+  {
+    name = "EasyMotion f does not write labels into a nonmodifiable split",
+    fn = function()
+      vim.cmd("only")
+      vim.cmd("enew!")
+      vim.api.nvim_buf_set_lines(0, 0, -1, false, { "x f x" })
+      local editable_window = vim.api.nvim_get_current_win()
+
+      vim.cmd("vsplit")
+      vim.cmd("enew")
+      vim.api.nvim_buf_set_lines(0, 0, -1, false, { "y f y" })
+      vim.bo.modifiable = false
+      local readonly_window = vim.api.nvim_get_current_win()
+      vim.api.nvim_set_current_win(editable_window)
+
+      local readonly_buffer = vim.api.nvim_win_get_buf(readonly_window)
+      local find_target = vim.api.nvim_replace_termcodes("ff3", true, false, true)
+      local ok, err = pcall(vim.api.nvim_feedkeys, find_target, "xt", false)
+
+      assert(ok, err)
+      assert_eq(vim.api.nvim_win_get_buf(readonly_window) == vim.api.nvim_get_current_buf(), false, "f should remain in the editable buffer")
+      assert_eq(vim.bo[readonly_buffer].modifiable, false, "readonly buffer should remain nonmodifiable")
+    end,
+  },
+  {
+    name = "EasyMotion f still crosses a fully modifiable split",
+    fn = function()
+      vim.cmd("only")
+      vim.cmd("enew!")
+      vim.api.nvim_buf_set_lines(0, 0, -1, false, { "x f x" })
+      local editable_window = vim.api.nvim_get_current_win()
+
+      vim.cmd("vsplit")
+      vim.cmd("enew")
+      vim.api.nvim_buf_set_lines(0, 0, -1, false, { "y f y" })
+      local other_window = vim.api.nvim_get_current_win()
+      vim.api.nvim_set_current_win(editable_window)
+
+      local keys = vim.api.nvim_replace_termcodes("ff3", true, false, true)
+      local ok, err = pcall(vim.api.nvim_feedkeys, keys, "xt", false)
+
+      assert(ok, err)
+      assert_eq(vim.api.nvim_get_current_win(), other_window, "f should select a target in another modifiable split")
+    end,
+  },
 }

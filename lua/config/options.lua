@@ -6,6 +6,7 @@ vim.opt.relativenumber = false
 vim.opt.list = true
 vim.opt.listchars = { space = "." }
 vim.opt.termguicolors = true
+vim.opt.linespace = 2 -- GUI frontends only; terminal line spacing is configured separately.
 
 
 vim.opt.tabstop = 4

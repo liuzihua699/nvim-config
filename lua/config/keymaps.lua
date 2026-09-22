@@ -49,6 +49,13 @@ map("n", "<leader>o", function()
   vim.notify("No previous jump in current buffer", vim.log.levels.INFO)
 end, { desc = "Jump back in current buffer" })
 
+map("x", "<leader>/", function()
+  local selection = Snacks.picker.util.visual()
+  if selection and selection.text ~= "" then
+    LazyVim.pick.open("live_grep", { search = selection.text })
+  end
+end, { desc = "Grep Selection (Root Dir)" })
+
 -- vim.keymap.set({ "n", "v" }, "J", "5j", { desc = "Move down 5 lines" })
 -- vim.keymap.set({ "n", "v" }, "K", "5k", { desc = "Move up 5 lines" })
 -- vim.keymap.set({ "n", "v" }, "H", "0", { desc = "Go to line start" })
