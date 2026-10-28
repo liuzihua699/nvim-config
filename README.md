@@ -15,14 +15,32 @@ A personalized Neovim configuration built on [LazyVim](https://github.com/LazyVi
 - **Image**: Sixel in-terminal image preview
 - **Project**: Auto-detect project root, auto-restore session
 
-## Quick Start
+## Interactive Install
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/liuzihua699/nvim-config/main/deploy.sh | bash -s -- install
+curl -fsSL https://raw.githubusercontent.com/liuzihua699/nvim-config/main/deploy.sh | bash
 ```
 
-## Uninstall
+The command opens an interactive menu for a full install/update, config-only update, environment diagnostics, backup restore, and uninstall.
+
+The recommended option installs Neovim, Git, build tools, CMake, Node.js, Java, search/image/clipboard tools, and lazygit. It then restores the locked plugins and installs the required Mason tools. A `sudo` password may be requested while system packages are installed.
+
+Supported platforms are Ubuntu, Debian, and WSL2 on x86_64 or arm64. A working network connection and Bash are required. AI credentials, Claude login, a Nerd Font, and Sixel terminal support must be configured separately.
+
+For an already cloned repository, run:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/liuzihua699/nvim-config/main/deploy.sh | bash -s -- uninstall
+bash deploy.sh
 ```
+
+Non-interactive subcommands remain available:
+
+```bash
+bash deploy.sh install
+bash deploy.sh config
+bash deploy.sh doctor
+bash deploy.sh restore
+bash deploy.sh uninstall
+```
+
+Configuration backups are stored under `~/.local/state/nvim-deploy/backups/`. Uninstalling keeps system packages, Claude credentials, and these backups.

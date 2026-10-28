@@ -44,6 +44,12 @@ require("lazy").setup({
     enabled = true, -- check for plugin updates periodically
     notify = false, -- notify on update
   }, -- automatically check for plugin updates
+  pkg = {
+    enabled = false, -- avoid image.nvim's optional rockspec when using the CLI processor
+  },
+  rocks = {
+    enabled = false, -- image.nvim uses ImageMagick CLI, so no LuaRocks toolchain is needed
+  },
   performance = {
     rtp = {
       -- disable some rtp plugins
